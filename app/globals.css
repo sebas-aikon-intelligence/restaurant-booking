@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Apple-like System Colors */
+  --background: #FFFFFF;
+  --foreground: #000000;
+
+  /* Surface Colors (Cards, Sidebars) */
+  --surface: #F5F5F7;
+  --surface-hover: #E5E5EA;
+
+  /* Brand/Action Colors */
+  --primary: #007AFF;
+  /* iOS Blue */
+  --primary-foreground: #FFFFFF;
+
+  --destructive: #FF3B30;
+  --success: #34C759;
+  --warning: #FFCC00;
+
+  --border: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode disabled by user request
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000000;
+    --foreground: #FFFFFF;
+
+    --surface: #1C1C1E;
+    --surface-hover: #2C2C2E;
+
+    --border: rgba(255, 255, 255, 0.1);
+  }
+}
+*/
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* .dark .glass {
+  background: rgba(28, 28, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+} */
+
+/* Utilities for neat layout */
+.layout-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
