@@ -7,7 +7,7 @@ export default async function RestaurantBookingPage({ params }: { params: { slug
 
   const { data: org } = await supabase
     .from('organizations')
-    .select('id, name, slug, description, logo_url, cover_url, phone, address')
+    .select('id, name, slug, description, logo_url, cover_url, phone, address, primary_color')
     .eq('slug', params.slug)
     .single()
 
