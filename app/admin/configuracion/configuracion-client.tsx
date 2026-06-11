@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 
 type Org = {
   id: string; name: string; slug?: string; phone?: string;
-  address?: string; description?: string; logo_url?: string; cover_url?: string
+  address?: string; description?: string; logo_url?: string; cover_url?: string; primary_color?: string
 }
 type Profile = { org_id?: string; full_name?: string; role?: string }
 type BusinessHour = {
@@ -42,6 +42,7 @@ export default function ConfiguracionClient({
     description: org?.description ?? '',
     logo_url: org?.logo_url ?? '',
     cover_url: org?.cover_url ?? '',
+    primary_color: org?.primary_color ?? '#F59E0B',
   })
   const [hours, setHours] = useState<BusinessHour[]>(
     DAYS.map((_, i) => businessHours.find(h => h.day_of_week === i) ?? DEFAULT_HOURS[i])
@@ -62,6 +63,7 @@ export default function ConfiguracionClient({
       description: orgForm.description || null,
       logo_url: orgForm.logo_url || null,
       cover_url: orgForm.cover_url || null,
+      primary_color: orgForm.primary_color || '#F59E0B',
     }).eq('id', org.id)
     setSaved(true)
     setTimeout(() => { setSaved(false); router.refresh() }, 2000)
@@ -173,21 +175,45 @@ export default function ConfiguracionClient({
               </div>
 
               <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
-                <h2 className="font-semibold text-gray-900">Imágenes</h2>
+                <h2 className="font-semibold text-gray-900">Imágenes y Marca</h2>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-gray-600">URL del Logo</label>
                   <input value={orgForm.logo_url} onChange={e => setOrgForm(p => ({ ...p, logo_url: e.target.value }))}
                     placeholder="https://..."
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black" />
+                  {orgForm.logo_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={orgForm.logo_url} alt="logo preview" className="mt-2 w-16 h-16 rounded-xl object-cover border border-gray-100" />
+                  )}
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">URL de imagen principal (portada)</label>
+                  <label className="text-xs font-medium text-gray-600">URL de imagen de portada</label>
                   <input value={orgForm.cover_url} onChange={e => setOrgForm(p => ({ ...p, cover_url: e.target.value }))}
                     placeholder="https://..."
                     className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black" />
                   {orgForm.cover_url && (
-                    <img src={orgForm.cover_url} alt="preview" className="mt-2 rounded-xl h-32 w-full object-cover border border-gray-100" />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={orgForm.cover_url} alt="cover preview" className="mt-2 rounded-xl h-32 w-full object-cover border border-gray-100" />
                   )}
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-gray-600">Color de acento (botones y detalles de la landing)</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={orgForm.primary_color}
+                      onChange={e => setOrgForm(p => ({ ...p, primary_color: e.target.value }))}
+                      className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5"
+                    />
+                    <input
+                      value={orgForm.primary_color}
+                      onChange={e => setOrgForm(p => ({ ...p, primary_color: e.target.value }))}
+                      placeholder="#F59E0B"
+                      className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black font-mono"
+                    />
+                    <div className="w-10 h-10 rounded-lg border border-gray-200 flex-shrink-0" style={{ backgroundColor: orgForm.primary_color }} />
+                  </div>
+                  <p className="text-xs text-gray-400">Este color se usa en los botones, selecciones y detalles de tu página de reservas.</p>
                 </div>
               </div>
 
