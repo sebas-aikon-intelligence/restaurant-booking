@@ -12,7 +12,8 @@ import {
   Settings,
   MessageSquare,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -26,9 +27,11 @@ const NAV_ITEMS = [
 
 export default function AdminSidebar({
   orgName,
+  orgSlug,
   userEmail
 }: {
   orgName: string
+  orgSlug: string
   userEmail: string
 }) {
   const pathname = usePathname()
@@ -45,6 +48,22 @@ export default function AdminSidebar({
           <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{orgName}</p>
         </div>
       </div>
+
+      {/* Preview public page button */}
+      {orgSlug && (
+        <div className="px-3 py-3 border-b border-gray-100">
+          <a
+            href={`/${orgSlug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400 transition-all shadow-sm hover:shadow-md group"
+          >
+            <ExternalLink className="w-4 h-4 flex-shrink-0" />
+            <span className="flex-1">Ver página del cliente</span>
+            <span className="text-[10px] opacity-70 group-hover:opacity-100 transition">↗</span>
+          </a>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
