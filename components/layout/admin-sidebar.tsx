@@ -9,20 +9,24 @@ import {
   UtensilsCrossed,
   Sparkles,
   Users,
+  Users2,
   Settings,
   MessageSquare,
   LogOut,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  PartyPopper
 } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { href: '/admin/reservas', label: 'Reservas', icon: CalendarCheck },
-  { href: '/admin/mensajes', label: 'Mensajes', icon: MessageSquare },
-  { href: '/admin/mesas', label: 'Mesas y Zonas', icon: LayoutGrid },
-  { href: '/admin/menu', label: 'Menú', icon: UtensilsCrossed },
-  { href: '/admin/eventos', label: 'Eventos', icon: Sparkles },
-  { href: '/admin/clientes', label: 'Clientes', icon: Users },
+  { href: '/admin/reservas',      label: 'Reservas',      icon: CalendarCheck },
+  { href: '/admin/mensajes',      label: 'Mensajes',      icon: MessageSquare },
+  { href: '/admin/mesas',         label: 'Mesas y Zonas', icon: LayoutGrid },
+  { href: '/admin/menu',          label: 'Menú',          icon: UtensilsCrossed },
+  { href: '/admin/eventos',       label: 'Eventos',       icon: Sparkles },
+  { href: '/admin/celebraciones', label: 'Celebraciones', icon: PartyPopper },
+  { href: '/admin/clientes',      label: 'Clientes',      icon: Users },
+  { href: '/admin/equipo',        label: 'Equipo',        icon: Users2 },
 ]
 
 export default function AdminSidebar({

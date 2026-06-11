@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Sparkles, Plus, Trash2, X, Loader2, Edit2, Eye, EyeOff, Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { ImageUpload } from '@/components/ui/image-upload'
 
 type Event = {
   id: string; title: string; description?: string;
@@ -14,7 +15,8 @@ export default function EventosClient({ events: initial, orgId }: { events: Even
   const [showModal, setShowModal] = useState(false)
   const [editEvent, setEditEvent] = useState<Event | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const [form, setForm] = useState({ title: '', description: '', event_date: '', image_url: '' })
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [form, setForm] = useState({ title: '', description: '', event_date: '' })
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,12 +28,13 @@ export default function EventosClient({ events: initial, orgId }: { events: Even
       title: form.title,
       description: form.description || null,
       event_date: form.event_date || null,
-      image_url: form.image_url || null,
+      image_url: imageUrl || null,
       is_active: true
     }).select().single()
     if (data) setEvents(prev => [...prev, data])
     setShowModal(false)
-    setForm({ title: '', description: '', event_date: '', image_url: '' })
+    setForm({ title: '', description: '', event_date: '' })
+    setImageUrl(null)
     setIsSaving(false)
   }
 
@@ -44,7 +47,7 @@ export default function EventosClient({ events: initial, orgId }: { events: Even
       title: form.title,
       description: form.description || null,
       event_date: form.event_date || null,
-      image_url: form.image_url || null,
+      image_url: imageUrl || null,
     }).eq('id', editEvent.id).select().single()
     if (data) setEvents(prev => prev.map(ev => ev.id === editEvent.id ? data : ev))
     setEditEvent(null)
@@ -66,7 +69,8 @@ export default function EventosClient({ events: initial, orgId }: { events: Even
 
   const openEdit = (event: Event) => {
     setEditEvent(event)
-    setForm({ title: event.title, description: event.description ?? '', event_date: event.event_date ?? '', image_url: event.image_url ?? '' })
+    setForm({ title: event.title, description: event.description ?? '', event_date: event.event_date ?? '' })
+    setImageUrl(event.image_url ?? null)
   }
 
   return (
@@ -77,7 +81,7 @@ export default function EventosClient({ events: initial, orgId }: { events: Even
           <h1 className="text-lg font-semibold text-gray-900">Eventos</h1>
           <span className="text-sm text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">{events.length}</span>
         </div>
-        <button onClick={() => setShowModal(true)}
+        <button onClick={() => { setForm({ title: '', description: '', event_date: '' }); setImageUrl(null); setShowModal(true) }}
           className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition">
           <Plus className="w-4 h-4" /> Nuevo evento
         </button>
@@ -148,6 +152,14 @@ export default function EventosClient({ events: initial, orgId }: { events: Even
               <button onClick={() => { setShowModal(false); setEditEvent(null) }}><X className="w-5 h-5 text-gray-400" /></button>
             </div>
             <form onSubmit={editEvent ? handleUpdate : handleCreate} className="px-6 py-5 space-y-4">
+              <ImageUpload
+                value={imageUrl}
+                onChange={setImageUrl}
+                path={`${orgId}/events/${editEvent?.id ?? 'new-' + Date.now()}`}
+                aspect="wide"
+                label="Imagen del evento"
+                hint="Recomendado: 1280×720px."
+              />
               <div className="space-y-1">
                 <label className="text-xs font-medium text-gray-600">Título *</label>
                 <input required value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
@@ -160,18 +172,10 @@ export default function EventosClient({ events: initial, orgId }: { events: Even
                   rows={3} placeholder="Describe el evento..."
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black resize-none" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">Fecha del evento</label>
-                  <input type="date" value={form.event_date} onChange={e => setForm(p => ({ ...p, event_date: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">URL de imagen</label>
-                  <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))}
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black" />
-                </div>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-600">Fecha del evento</label>
+                <input type="date" value={form.event_date} onChange={e => setForm(p => ({ ...p, event_date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black" />
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => { setShowModal(false); setEditEvent(null) }}

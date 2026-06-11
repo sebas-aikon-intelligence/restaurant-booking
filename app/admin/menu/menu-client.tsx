@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { UtensilsCrossed, Plus, Trash2, X, Loader2, Star, Eye, EyeOff, Edit2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { ImageUpload } from '@/components/ui/image-upload'
 
 type Category = { id: string; name: string; sort_order: number }
 type MenuItem = {
@@ -27,6 +28,7 @@ export default function MenuClient({
   const [showItemModal, setShowItemModal] = useState(false)
   const [editItem, setEditItem] = useState<MenuItem | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [catName, setCatName] = useState('')
   const [itemForm, setItemForm] = useState({
     name: '', description: '', price: '', category_id: initCats[0]?.id ?? '', is_featured: false
@@ -58,6 +60,7 @@ export default function MenuClient({
       name: itemForm.name,
       description: itemForm.description || null,
       price: itemForm.price ? parseFloat(itemForm.price) : null,
+      image_url: imageUrl || null,
       category_id: itemForm.category_id || null,
       is_featured: itemForm.is_featured,
       is_active: true,
@@ -66,6 +69,7 @@ export default function MenuClient({
     if (data) setItems(prev => [...prev, data])
     setShowItemModal(false)
     setItemForm({ name: '', description: '', price: '', category_id: categories[0]?.id ?? '', is_featured: false })
+    setImageUrl(null)
     setIsSaving(false)
   }
 
@@ -78,11 +82,12 @@ export default function MenuClient({
       name: itemForm.name,
       description: itemForm.description || null,
       price: itemForm.price ? parseFloat(itemForm.price) : null,
+      image_url: imageUrl || null,
       category_id: itemForm.category_id || null,
       is_featured: itemForm.is_featured,
     }).eq('id', editItem.id).select().single()
     if (data) setItems(prev => prev.map(i => i.id === editItem.id ? data : i))
-    setEditItem(null); setIsSaving(false)
+    setEditItem(null); setImageUrl(null); setIsSaving(false)
   }
 
   const toggleActive = async (item: MenuItem) => {
@@ -101,6 +106,7 @@ export default function MenuClient({
   const openEdit = (item: MenuItem) => {
     setEditItem(item)
     setItemForm({ name: item.name, description: item.description ?? '', price: item.price?.toString() ?? '', category_id: item.category_id ?? '', is_featured: item.is_featured })
+    setImageUrl(item.image_url ?? null)
   }
 
   return (
@@ -116,7 +122,7 @@ export default function MenuClient({
             className="flex items-center gap-2 border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
             <Plus className="w-4 h-4" /> Categoría
           </button>
-          <button onClick={() => setShowItemModal(true)}
+          <button onClick={() => { setImageUrl(null); setShowItemModal(true) }}
             className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-800 transition">
             <Plus className="w-4 h-4" /> Producto
           </button>
@@ -231,6 +237,14 @@ export default function MenuClient({
               <button onClick={() => { setShowItemModal(false); setEditItem(null) }}><X className="w-5 h-5 text-gray-400" /></button>
             </div>
             <form onSubmit={editItem ? handleUpdateItem : handleCreateItem} className="px-6 py-5 space-y-4">
+              <ImageUpload
+                value={imageUrl}
+                onChange={setImageUrl}
+                path={`${orgId}/menu/${editItem?.id ?? 'new-' + Date.now()}`}
+                aspect="landscape"
+                label="Foto del producto"
+                hint="Recomendado: 800×600px."
+              />
               <div className="space-y-1">
                 <label className="text-xs font-medium text-gray-600">Nombre *</label>
                 <input required value={itemForm.name} onChange={e => setItemForm(p => ({ ...p, name: e.target.value }))}

@@ -13,11 +13,12 @@ export default async function RestaurantBookingPage({ params }: { params: { slug
 
   if (!org) notFound()
 
-  const [zonesRes, tablesRes, eventsRes, hoursRes] = await Promise.all([
+  const [zonesRes, tablesRes, eventsRes, hoursRes, celebrationsRes] = await Promise.all([
     supabase.from('zones').select('*').eq('org_id', org.id),
     supabase.from('tables').select('*').eq('org_id', org.id),
     supabase.from('events').select('*').eq('org_id', org.id).eq('is_active', true).order('event_date'),
     supabase.from('business_hours').select('*').eq('org_id', org.id).order('day_of_week'),
+    supabase.from('celebrations').select('*').eq('org_id', org.id).eq('is_active', true).order('sort_order'),
   ])
 
   return (
@@ -27,6 +28,7 @@ export default async function RestaurantBookingPage({ params }: { params: { slug
       tables={tablesRes.data ?? []}
       events={eventsRes.data ?? []}
       businessHours={hoursRes.data ?? []}
+      celebrations={celebrationsRes.data ?? []}
     />
   )
 }

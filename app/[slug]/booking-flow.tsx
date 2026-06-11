@@ -17,6 +17,7 @@ type Zone   = { id: string; name: string }
 type Table  = { id: string; zone_id: string; number: string; seats: number; status: string; position?: { x: number; y: number; shape: 'rect' | 'circle' } | null }
 type Event  = { id: string; title: string; description?: string; event_date?: string; image_url?: string }
 type BusinessHour = { day_of_week: number; open_time?: string; close_time?: string; is_closed: boolean; booking_duration_minutes?: number }
+type Celebration  = { id: string; name: string; emoji: string; description?: string; includes: string[]; price?: number; image_url?: string }
 
 type Step = 'landing' | 'fecha' | 'hora' | 'personas' | 'ocasion' | 'zona' | 'mesa' | 'datos' | 'confirmacion' | 'exito'
 
@@ -156,16 +157,17 @@ function Confetti() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function BookingFlow({
-  org, zones, tables, events, businessHours
+  org, zones, tables, events, businessHours, celebrations
 }: {
-  org: Org; zones: Zone[]; tables: Table[]; events: Event[]; businessHours: BusinessHour[]
+  org: Org; zones: Zone[]; tables: Table[]; events: Event[]; businessHours: BusinessHour[]; celebrations: Celebration[]
 }) {
   const [step, setStep]                   = useState<Step>('landing')
   const [selectedDate, setSelectedDate]   = useState('')
   const [selectedTime, setSelectedTime]   = useState('')
   const [partySize, setPartySize]         = useState(2)
   const [occasion, setOccasion]           = useState('')
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [selectedEvent, setSelectedEvent]             = useState<Event | null>(null)
+  const [selectedCelebration, setSelectedCelebration] = useState<Celebration | null>(null)
   const [selectedZone, setSelectedZone]   = useState<Zone | null>(null)
   const [selectedTable, setSelectedTable] = useState<Table | null>(null)
   const [form, setForm]                   = useState({ name: '', email: '', phone: '', comments: '' })
@@ -243,7 +245,7 @@ export default function BookingFlow({
       guest_name:     form.name,
       guest_email:    form.email,
       guest_phone:    form.phone || null,
-      guest_comments: [form.comments, occasion !== 'none' ? `Ocasión: ${OCCASIONS.find(o => o.id === occasion)?.label}` : '', selectedEvent ? `Evento: ${selectedEvent.title}` : ''].filter(Boolean).join(' | ') || null,
+      guest_comments: [form.comments, occasion && occasion !== 'none' ? `Ocasión: ${selectedCelebration?.name ?? OCCASIONS.find(o => o.id === occasion)?.label}` : '', selectedEvent ? `Evento: ${selectedEvent.title}` : ''].filter(Boolean).join(' | ') || null,
       booking_date:   selectedDate,
       booking_time:   selectedTime,
       party_size:     partySize,
@@ -561,6 +563,47 @@ export default function BookingFlow({
                     })}
                   </div>
 
+                  {celebrations.length > 0 && (
+                    <div>
+                      <p className="text-xs text-white/30 uppercase tracking-widest font-medium mb-3">Paquetes de celebración</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {celebrations.map((cel, i) => {
+                          const active = selectedCelebration?.id === cel.id
+                          return (
+                            <button
+                              key={cel.id}
+                              onClick={() => {
+                                setSelectedCelebration(active ? null : cel)
+                                if (!active) setOccasion(cel.id)
+                                else setOccasion('')
+                              }}
+                              className={`scale-in glass-sm rounded-2xl p-4 flex items-center gap-3 text-left transition-all ${active ? 'occasion-selected' : 'hover:bg-white/10'}`}
+                              style={{ animationDelay: `${i * 0.05}s` }}
+                            >
+                              {cel.image_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={cel.image_url} alt={cel.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                              ) : (
+                                <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0 text-2xl">
+                                  {cel.emoji}
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className={`font-semibold text-sm ${active ? 'text-amber-300' : 'text-white/80'}`}>{cel.name}</p>
+                                {cel.price ? (
+                                  <p className="text-xs text-white/40 mt-0.5">+${cel.price.toLocaleString('es')}</p>
+                                ) : (
+                                  <p className="text-xs text-white/30 mt-0.5">Incluido</p>
+                                )}
+                              </div>
+                              {active && <CheckCircle2 className="w-4 h-4 text-amber-400 flex-shrink-0" />}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {events.length > 0 && (
                     <div>
                       <p className="text-xs text-white/30 uppercase tracking-widest font-medium mb-3">O únete a un evento especial</p>
@@ -772,11 +815,11 @@ export default function BookingFlow({
                       {(occasion && occasion !== 'none') && (
                         <div className="flex items-center gap-3">
                           <span className="text-lg">
-                            {OCCASIONS.find(o => o.id === occasion)?.emoji}
+                            {selectedCelebration?.emoji ?? OCCASIONS.find(o => o.id === occasion)?.emoji}
                           </span>
                           <span className="text-white/40 text-sm w-20">Ocasión</span>
                           <span className="text-amber-300 text-sm font-medium flex-1 text-right">
-                            {OCCASIONS.find(o => o.id === occasion)?.label}
+                            {selectedCelebration?.name ?? OCCASIONS.find(o => o.id === occasion)?.label}
                           </span>
                         </div>
                       )}

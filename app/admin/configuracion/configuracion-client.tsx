@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Settings, Loader2, CheckCircle2, Globe, Clock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { ImageUpload } from '@/components/ui/image-upload'
 
 type Org = {
   id: string; name: string; slug?: string; phone?: string;
@@ -176,26 +177,22 @@ export default function ConfiguracionClient({
 
               <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
                 <h2 className="font-semibold text-gray-900">Imágenes y Marca</h2>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">URL del Logo</label>
-                  <input value={orgForm.logo_url} onChange={e => setOrgForm(p => ({ ...p, logo_url: e.target.value }))}
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black" />
-                  {orgForm.logo_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={orgForm.logo_url} alt="logo preview" className="mt-2 w-16 h-16 rounded-xl object-cover border border-gray-100" />
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-gray-600">URL de imagen de portada</label>
-                  <input value={orgForm.cover_url} onChange={e => setOrgForm(p => ({ ...p, cover_url: e.target.value }))}
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-black" />
-                  {orgForm.cover_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={orgForm.cover_url} alt="cover preview" className="mt-2 rounded-xl h-32 w-full object-cover border border-gray-100" />
-                  )}
-                </div>
+                <ImageUpload
+                  value={orgForm.logo_url || null}
+                  onChange={url => setOrgForm(p => ({ ...p, logo_url: url ?? '' }))}
+                  path={`${org?.id}/logos/logo`}
+                  aspect="square"
+                  label="Logo del restaurante"
+                  hint="Recomendado: 400×400px. Se muestra en la página de reservas y el panel."
+                />
+                <ImageUpload
+                  value={orgForm.cover_url || null}
+                  onChange={url => setOrgForm(p => ({ ...p, cover_url: url ?? '' }))}
+                  path={`${org?.id}/covers/cover`}
+                  aspect="cover"
+                  label="Imagen de portada"
+                  hint="Recomendado: 1920×720px. Fondo hero de la página de reservas."
+                />
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-gray-600">Color de acento (botones y detalles de la landing)</label>
                   <div className="flex items-center gap-3">
