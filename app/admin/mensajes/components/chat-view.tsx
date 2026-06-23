@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Check, CheckCheck, Clock, AlertTriangle, Bot, User, Paperclip, Volume2, FileText } from 'lucide-react'
+import { Check, CheckCheck, Clock, AlertTriangle, User, Paperclip, Volume2, FileText, Zap } from 'lucide-react'
 import type { ChatMessage } from '@/lib/types/crm'
 
 function formatTime(dateStr: string) {
@@ -27,22 +27,22 @@ function DeliveryIcon({ status }: { status: ChatMessage['delivery_status'] }) {
   return null
 }
 
-function SenderLabel({ senderType }: { senderType: ChatMessage['sender_type'] }) {
-  if (senderType === 'bot') return (
-    <span className="flex items-center gap-1 text-[10px] text-indigo-500 font-medium mb-0.5">
-      <Bot className="w-3 h-3" /> IA Agente
-    </span>
+/** System/AI action events — shown as centered pill, not as chat bubble */
+function SystemEvent({ message }: { message: ChatMessage }) {
+  return (
+    <div className="flex justify-center my-3">
+      <div className="flex items-center gap-1.5 bg-gray-100 text-gray-500 text-[11px] font-medium px-3 py-1 rounded-full max-w-[80%] text-center leading-snug">
+        <Zap className="w-3 h-3 flex-shrink-0 text-gray-400" />
+        <span>{message.content}</span>
+        <span className="text-gray-400 ml-1 flex-shrink-0">{formatTime(message.created_at)}</span>
+      </div>
+    </div>
   )
-  if (senderType === 'agent') return (
-    <span className="flex items-center gap-1 text-[10px] text-blue-500 font-medium mb-0.5">
-      <User className="w-3 h-3" /> Agente
-    </span>
-  )
-  return null
 }
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isOutbound = message.direction === 'outbound'
+  const isAgent = message.sender_type === 'agent'
 
   const renderContent = () => {
     if (message.content_type === 'audio') {
@@ -91,11 +91,19 @@ function MessageBubble({ message }: { message: ChatMessage }) {
     return (
       <div className="flex justify-end mb-2">
         <div className="max-w-[70%]">
-          <SenderLabel senderType={message.sender_type} />
-          <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm">
+          {isAgent && (
+            <span className="flex items-center justify-end gap-1 text-[10px] text-blue-500 font-medium mb-0.5">
+              <User className="w-3 h-3" /> Agente
+            </span>
+          )}
+          <div className={`rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm ${
+            isAgent
+              ? 'bg-blue-600 text-white'
+              : 'bg-indigo-600 text-white'
+          }`}>
             {renderContent()}
             <div className="flex items-center justify-end gap-1 mt-1">
-              <span className="text-[11px] text-indigo-200">{formatTime(message.created_at)}</span>
+              <span className={`text-[11px] ${isAgent ? 'text-blue-200' : 'text-indigo-200'}`}>{formatTime(message.created_at)}</span>
               <DeliveryIcon status={message.delivery_status} />
             </div>
           </div>
@@ -172,9 +180,11 @@ export function ChatView({ messages, loading }: { messages: ChatMessage[]; loadi
             <span className="text-xs text-gray-400 font-medium bg-gray-50 px-2">{group.date}</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
-          {group.messages.map(msg => (
-            <MessageBubble key={msg.id} message={msg} />
-          ))}
+          {group.messages.map(msg =>
+            msg.sender_type === 'system'
+              ? <SystemEvent key={msg.id} message={msg} />
+              : <MessageBubble key={msg.id} message={msg} />
+          )}
         </div>
       ))}
       <div ref={bottomRef} />
